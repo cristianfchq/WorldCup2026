@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · Pronósticos Mundial 2026</title>
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1 class="app-header__title">🔧 Panel Admin</h1>
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Cambiar tema">🌙</button>
+    </header>
+
+    <section id="admin-gate" class="gate-card">
+      <h2>Ingresa el PIN de administrador</h2>
+      <form id="admin-gate-form">
+        <input id="admin-pin-input" type="password" placeholder="PIN" autocomplete="off" required />
+        <button type="submit" class="btn btn--primary">Entrar</button>
+      </form>
+    </section>
+
+    <section id="admin-panel" hidden>
+      <div style="text-align: right; margin-bottom: 1rem;">
+        <button id="logout-btn" class="btn" type="button">Cerrar sesión admin</button>
+      </div>
+
+      <nav id="admin-tabs" class="phase-tabs"></nav>
+
+      <div id="admin-tab-import">
+        <section class="admin-section">
+          <h2>Importar participantes</h2>
+          <p>Sube un archivo JSON con el formato de <code>data/participants.example.json</code>.</p>
+          <div class="admin-section__actions">
+            <input id="participants-file" type="file" accept="application/json" />
+            <button id="import-participants-btn" class="btn btn--primary" type="button">Importar participantes</button>
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <h2>Importar partidos</h2>
+          <p>Sube un archivo JSON con el formato de <code>data/matches.example.json</code>.</p>
+          <div class="admin-section__actions">
+            <input id="matches-file" type="file" accept="application/json" />
+            <button id="import-matches-btn" class="btn btn--primary" type="button">Importar partidos</button>
+          </div>
+        </section>
+      </div>
+
+      <div id="admin-tab-results" hidden>
+        <section class="admin-section">
+          <div class="admin-section__actions" style="justify-content: space-between;">
+            <h2 style="margin: 0;">Cargar resultados reales</h2>
+            <button id="recalculate-all-btn" class="btn" type="button">🔁 Recalcular todos los puntos</button>
+          </div>
+          <p>Al guardar un resultado, se recalculan automáticamente los puntos de todos los pronósticos de ese partido.</p>
+          <div id="results-form"></div>
+        </section>
+      </div>
+
+      <div id="admin-tab-overview" hidden>
+        <section class="admin-section">
+          <div class="admin-section__actions" style="justify-content: space-between;">
+            <h2 style="margin: 0;">Ver todos los pronósticos</h2>
+            <button id="refresh-overview-btn" class="btn" type="button">🔄 Actualizar</button>
+          </div>
+          <p>Quién pronosticó qué en cada partido, quién todavía no lo hizo, y el control de pago de apuestas.</p>
+          <div id="predictions-overview"></div>
+        </section>
+      </div>
+
+      <div id="admin-tab-payments" hidden>
+        <section class="admin-section">
+          <div class="admin-section__actions" style="justify-content: space-between;">
+            <h2 style="margin: 0;">Resumen de pagos</h2>
+            <button id="refresh-payments-btn" class="btn" type="button">🔄 Actualizar</button>
+          </div>
+          <p>✅ pagado / ❌ pendiente por partido, con el total que le corresponde a cada participante.</p>
+          <div id="payments-summary"></div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

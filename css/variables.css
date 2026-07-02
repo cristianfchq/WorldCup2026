@@ -1,0 +1,45 @@
+/* Paleta de colores: tonos relajantes (verde-azulado + arena cálida), con
+   variantes para modo claro y oscuro. Todo el resto del CSS consume estas
+   variables, así que cambiar la paleta completa es tocar solo este archivo. */
+:root {
+  color-scheme: light;
+  --color-primary: #2f9e8f;
+  --color-primary-dark: #1f7266;
+  --color-accent: #f4a259;
+  --color-success: #4caf7d;
+  --color-success-soft: rgba(76, 175, 125, 0.18);
+  --color-danger: #e0637a;
+
+  --color-bg: #f6f9f8;
+  --color-surface: #ffffff;
+  --color-border: #e1e8e6;
+  --color-text: #1f2d2b;
+  --color-text-muted: #5c6f6b;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  --shadow-soft: 0 8px 24px rgba(31, 45, 43, 0.08);
+  --shadow-lift: 0 14px 32px rgba(31, 45, 43, 0.14);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-primary: #4fc9b8;
+  --color-primary-dark: #2f9e8f;
+  --color-accent: #f4a259;
+  --color-success-soft: rgba(79, 201, 184, 0.22);
+
+  --color-bg: #10201d;
+  --color-surface: #16302b;
+  --color-border: #234840;
+  --color-text: #eaf4f1;
+  --color-text-muted: #9fb8b2;
+
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 14px 32px rgba(0, 0, 0, 0.45);
+}

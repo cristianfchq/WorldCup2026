@@ -1,0 +1,92 @@
+// Reglas de seguridad de Firestore para el proyecto de pronósticos.
+//
+// CONTEXTO IMPORTANTE: esta web NO usa Firebase Authentication (se decidió así
+// porque no todos los participantes tienen cuenta de Google). Sin autenticación,
+// Firestore no puede verificar "quién" hace una escritura, así que estas reglas
+// NO pueden distinguir de forma segura a un admin real de cualquier visitante.
+// El PIN del panel admin es solo una barrera en la interfaz (UI), no una barrera
+// de seguridad real a nivel de base de datos. Para un grupo cerrado de ~15
+// personas de confianza esto es un riesgo aceptado y aceptado explícitamente
+// por el dueño del proyecto. Si en el futuro se agrega Firebase Authentication,
+// estas reglas deben endurecerse usando request.auth.
+//
+// Lo que SÍ se puede aplicar de forma robusta sin autenticación es la regla más
+// importante del proyecto: una vez que un pronóstico queda marcado como
+// "locked" (bloqueado), NADIE puede modificarlo, ni siquiera llamando
+// directamente a la API de Firestore. Eso se garantiza abajo en /predictions.
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Participantes: lista de nombres para el combobox. Lectura pública,
+    // escritura pública (la usa el panel admin al importar el JSON).
+    match /participants/{participantId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.keys().hasAll(['name'])
+                              && request.resource.data.name is string
+                              && request.resource.data.name.size() > 0;
+      allow delete: if true;
+    }
+
+    // Partidos: fixture con fechas, equipos y resultado real (cuando el admin
+    // lo carga). Lectura pública para toda la web.
+    match /matches/{matchId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.keys().hasAll(
+                                ['phase', 'date', 'time', 'teamA', 'teamB']
+                              )
+                              && request.resource.data.phase in
+                                 ['ro32', 'ro16', 'quarters', 'semis', 'final'];
+      allow delete: if true;
+    }
+
+    // Pronósticos: un documento por participante+partido, con id
+    // "<matchId>_<participantId>" (ver PredictionRepository.js).
+    match /predictions/{predictionId} {
+      allow read: if true;
+
+      // Crear un pronóstico nuevo: debe traer los campos esperados y nacer
+      // SIN estar bloqueado (el bloqueo se activa recién al guardar).
+      allow create: if request.resource.data.keys().hasAll(
+                        ['matchId', 'participantId', 'participantName', 'scoreA', 'scoreB', 'locked']
+                      )
+                      && request.resource.data.scoreA is int && request.resource.data.scoreA >= 0
+                      && request.resource.data.scoreB is int && request.resource.data.scoreB >= 0;
+
+      // Editar un pronóstico existente: SOLO en dos casos.
+      // 1) Todavía no estaba bloqueado: edición libre normal (guardar/editar
+      //    antes de enviar).
+      // 2) Ya estaba bloqueado: el marcador (scoreA/scoreB) y a quién
+      //    pertenece (matchId/participantId) NO pueden cambiar bajo ningún
+      //    concepto (eso es lo que impide editar un pronóstico ya enviado,
+      //    incluso llamando directamente a la API). Pero SÍ se permite tocar
+      //    otros campos, porque el panel admin necesita poder:
+      //      - desbloquear (pasar locked a false), y
+      //      - recalcular "points" cuando carga el resultado real del
+      //        partido (ScoringService.recalculateForMatch).
+      allow update: if resource.data.locked == false
+                      || (
+                           request.resource.data.scoreA == resource.data.scoreA &&
+                           request.resource.data.scoreB == resource.data.scoreB &&
+                           request.resource.data.matchId == resource.data.matchId &&
+                           request.resource.data.participantId == resource.data.participantId
+                         );
+
+      allow delete: if false;
+    }
+
+    // Apuestas: registro de si un participante pagó su apuesta de un
+    // partido puntual (solo lo usa el panel admin). Un documento por
+    // participante+partido, id "<matchId>_<participantId>".
+    match /bets/{betId} {
+      allow read: if true;
+      allow create, update: if request.resource.data.keys().hasAll(
+                                ['matchId', 'participantId', 'participantName', 'paid']
+                              )
+                              && request.resource.data.paid is bool;
+      allow delete: if false;
+    }
+  }
+}

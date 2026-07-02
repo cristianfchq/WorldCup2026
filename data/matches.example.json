@@ -1,0 +1,157 @@
+{
+  "_comentario": "EJEMPLO de formato para el botón 'Importar partidos' del panel admin. Los equipos y fechas de abajo son PLACEHOLDERS (no son el fixture real, porque no se pudo verificar en vivo). Reemplaza teamA/teamB/date/time con los datos reales antes de importar. 'phase' debe ser uno de: ro32, ro16, quarters, semis, final. 'date' en formato YYYY-MM-DD y 'time' en formato 24h HH:mm (hora local de tus participantes).",
+  "matches": [
+    {
+      "phase": "ro32",
+      "matchNumber": 73,
+      "date": "2026-06-29",
+      "time": "12:00",
+      "teamA": "Brazil",
+      "teamB": "Japon",
+      "venue": "Estadio Ejemplo 1"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 74,
+      "date": "2026-06-29",
+      "time": "15:00",
+      "teamA": "Alemania",
+      "teamB": "Paraguay",
+      "venue": "Estadio Ejemplo 2"
+    },
+    {
+        "phase": "ro32",
+        "matchNumber": 75,
+        "date": "2026-06-29",
+        "time": "18:00",
+        "teamA": "Paises Bajos",
+        "teamB": "Marruecos",
+        "venue": "Estadio Ejemplo 3"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 76,
+      "date": "2026-06-30",
+      "time": "12:00",
+      "teamA": "Costa de Marfil",
+      "teamB": "Noruega",
+      "venue": "Estadio Ejemplo 1"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 77,
+      "date": "2026-06-30",
+      "time": "15:00",
+      "teamA": "Francia",
+      "teamB": "Suecia",
+      "venue": "Estadio Ejemplo 2"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 78,
+      "date": "2026-06-30",
+      "time": "18:00",
+      "teamA": "Mexico",
+      "teamB": "Ecuador",
+      "venue": "Estadio Ejemplo 3"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 79,
+      "date": "2026-07-01",
+      "time": "12:00",
+      "teamA": "Inglaterra",
+      "teamB": "RD Congo",
+      "venue": "Estadio Ejemplo 1"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 80,
+      "date": "2026-07-01",
+      "time": "15:00",
+      "teamA": "Belgica",
+      "teamB": "Senegal",
+      "venue": "Estadio Ejemplo 2"
+    },
+    {
+        "phase": "ro32",
+        "matchNumber": 81,
+        "date": "2026-07-01",
+        "time": "18:00",
+        "teamA": "Estados Unidos",
+        "teamB": "Bosnia y Herzegovina",
+        "venue": "Estadio Ejemplo 3"
+    },
+    {
+        "phase": "ro32",
+        "matchNumber": 82,
+        "date": "2026-07-02",
+        "time": "15:00",
+        "teamA": "España",
+        "teamB": "Austria",
+        "venue": "Estadio Ejemplo 1"
+    },
+    {
+        "phase": "ro32",
+        "matchNumber": 83,
+        "date": "2026-07-02",
+        "time": "19:00",
+        "teamA": "Portugal",
+        "teamB": "Croacia",
+        "venue": "Estadio Ejemplo 2"
+    },
+    {
+        "phase": "ro32",
+        "matchNumber": 84,
+        "date": "2026-07-02",
+        "time": "23:00",
+        "teamA": "Suiza",
+        "teamB": "Argelia",
+        "venue": "Estadio Ejemplo 3"
+    },
+    
+
+    {
+      "phase": "ro16",
+      "matchNumber": 89,
+      "date": "2026-07-05",
+      "time": "12:00",
+      "teamA": "Ganador Partido 73",
+      "teamB": "Ganador Partido 74",
+      "venue": "Estadio Ejemplo 1"
+    },
+
+
+    {
+      "phase": "quarters",
+      "matchNumber": 97,
+      "date": "2026-07-10",
+      "time": "15:00",
+      "teamA": "Ganador Octavos 1",
+      "teamB": "Ganador Octavos 2",
+      "venue": "Estadio Ejemplo 4"
+    },
+
+
+    {
+      "phase": "semis",
+      "matchNumber": 101,
+      "date": "2026-07-14",
+      "time": "15:00",
+      "teamA": "Ganador Cuartos 1",
+      "teamB": "Ganador Cuartos 2",
+      "venue": "Estadio Ejemplo 5"
+    },
+
+
+    {
+      "phase": "final",
+      "matchNumber": 104,
+      "date": "2026-07-19",
+      "time": "12:00",
+      "teamA": "Ganador Semifinal 1",
+      "teamB": "Ganador Semifinal 2",
+      "venue": "Estadio Ejemplo Final"
+    }
+  ]
+}

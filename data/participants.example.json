@@ -1,0 +1,14 @@
+{
+  "_comentario": "Este archivo es SOLO un ejemplo para subir mediante el botón 'Importar participantes' del panel admin (admin.html). No se lee automáticamente por la web publica: hay que importarlo una vez desde el admin y luego los datos viven en Firestore.",
+  "participants": [
+    { "name": "Dr Herrera" },
+    { "name": "Dra Sonia" },
+    { "name": "Grecia" },
+    { "name": "Rolando" },
+    { "name": "Eduardo" },
+    { "name": "Milenka" },
+    { "name": "Coral" },
+    { "name": "Jose" },
+    { "name": "Cristian" }
+  ]
+}

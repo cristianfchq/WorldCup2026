@@ -1,0 +1,154 @@
+.result-row-wrapper {
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.6rem 0;
+}
+
+.result-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+@media (max-width: 640px) {
+  .result-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.result-row input {
+  width: 3.5rem;
+  text-align: center;
+  padding: 0.4rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Fila de "Ver todos los pronósticos": resalta al participante que acertó,
+   una vez que el admin cargó el resultado real de ese partido. */
+.row--correct {
+  background: var(--color-success-soft);
+}
+
+.row--correct td {
+  font-weight: 600;
+}
+
+/* Botón de estado de pago de apuesta, con colores amigables (no rojo/verde
+   puros) para que combinen con el resto de la paleta. */
+.payment-toggle {
+  color: white;
+  font-size: 0.8rem;
+  padding: 0.45rem 0.8rem;
+}
+
+.payment-toggle--paid {
+  background: var(--color-success);
+}
+
+.payment-toggle--unpaid {
+  background: var(--color-danger);
+}
+
+.payments-total-row td {
+  border-top: 2px solid var(--color-border);
+  padding-top: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+/* Matriz participante x partido de la pestaña "Resumen de pagos". */
+.payments-summary-scroll {
+  overflow-x: auto;
+}
+
+.payments-summary-table {
+  white-space: nowrap;
+}
+
+.payments-summary-table th,
+.payments-summary-table td {
+  padding: 0.5rem 0.7rem;
+  text-align: center;
+}
+
+.payments-summary-table th:first-child,
+.payments-summary-table td:first-child {
+  text-align: left;
+  position: sticky;
+  left: 0;
+}
+
+.payments-summary-table td:first-child {
+  background: var(--color-surface);
+}
+
+.payments-summary-table th:first-child {
+  background: var(--color-primary);
+}
+
+.payments-summary-icon {
+  font-size: 1rem;
+}
+
+.payments-summary-pending {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.payments-summary-won {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+/* Toggle switch: "Solo hasta hoy" / "Todos los partidos" en Resumen de pagos. */
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+.toggle-switch__track {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  background: var(--color-border);
+  border-radius: 999px;
+  transition: background var(--transition-fast);
+}
+
+.toggle-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: var(--shadow-soft);
+  transition: transform var(--transition-fast);
+}
+
+.toggle-switch input:checked + .toggle-switch__track {
+  background: var(--color-primary);
+}
+
+.toggle-switch input:checked + .toggle-switch__track .toggle-switch__thumb {
+  transform: translateX(18px);
+}
+
+.toggle-switch__text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
