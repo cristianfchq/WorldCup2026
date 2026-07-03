@@ -4,11 +4,11 @@
  * "phase-tab") para que cualquier lugar del sitio que use tabs se vea igual.
  */
 export class TabsComponent {
-  constructor(containerElement, tabs, { onChange }) {
+  constructor(containerElement, tabs, { onChange, initialKey }) {
     this.container = containerElement;
     this.tabs = tabs;
     this.onChange = onChange;
-    this.activeKey = tabs[0]?.key ?? null;
+    this.activeKey = initialKey ?? tabs[0]?.key ?? null;
     this.render();
   }
 

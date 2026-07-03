@@ -21,12 +21,22 @@ export class MatchRepository {
     await FirebaseService.save(COLLECTION, match.id, match.toFirestore());
   }
 
-  /** Alta rápida a partir de los campos crudos del JSON de importación. */
-  async createFromRaw(raw) {
+  /**
+   * Alta a partir de los campos crudos del JSON de importación. Si YA existe
+   * un partido con ese id (misma fase + número de partido), NO lo toca —
+   * así se puede volver a importar un archivo con partidos viejos y nuevos
+   * mezclados sin perder resultados, penales o apuestas cerradas que el
+   * admin ya haya cargado para los partidos existentes.
+   * @returns {Promise<boolean>} true si se creó un partido nuevo, false si ya existía y se dejó igual.
+   */
+  async createIfNotExists(raw) {
     const id = `${raw.phase}-${raw.matchNumber}`;
+    const existing = await this.getById(id);
+    if (existing) return false;
+
     const match = new Match({ id, ...raw });
     await this.save(match);
-    return match;
+    return true;
   }
 
   /**

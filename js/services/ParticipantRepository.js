@@ -12,16 +12,30 @@ export class ParticipantRepository {
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  async getById(id) {
+    const doc = await FirebaseService.getById(COLLECTION, id);
+    return doc ? Participant.fromFirestore(doc.id, doc.data) : null;
+  }
+
   async save(participant) {
     await FirebaseService.save(COLLECTION, participant.id, participant.toFirestore());
   }
 
-  /** Alta rápida a partir de un nombre (usada por la importación masiva). */
-  async createFromName(name) {
+  /**
+   * Alta a partir de un nombre (usada por la importación masiva). Si ya
+   * existe un participante con ese mismo nombre, no lo toca — permite
+   * re-importar un archivo con nombres viejos y nuevos mezclados sin
+   * duplicar ni pisar nada.
+   * @returns {Promise<boolean>} true si se creó uno nuevo, false si ya existía.
+   */
+  async createIfNotExists(name) {
     const id = slugify(name);
+    const existing = await this.getById(id);
+    if (existing) return false;
+
     const participant = new Participant({ id, name });
     await this.save(participant);
-    return participant;
+    return true;
   }
 }
 

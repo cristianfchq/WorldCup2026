@@ -101,8 +101,9 @@ class AdminApp {
     const file = document.getElementById('participants-file').files[0];
     if (!file) return this.toast.show('Elige primero un archivo .json', 'error');
     try {
-      const count = await this.importService.importParticipants(file);
-      this.toast.show(`${count} participante(s) importado(s) ✅`, 'success');
+      const { created, skipped } = await this.importService.importParticipants(file);
+      const skippedText = skipped > 0 ? ` (${skipped} ya existían, no se tocaron)` : '';
+      this.toast.show(`${created} participante(s) nuevo(s) importado(s)${skippedText} ✅`, 'success');
       this.renderResultsForm();
       this.renderPredictionsOverview();
     } catch (error) {
@@ -115,8 +116,9 @@ class AdminApp {
     const file = document.getElementById('matches-file').files[0];
     if (!file) return this.toast.show('Elige primero un archivo .json', 'error');
     try {
-      const count = await this.importService.importMatches(file);
-      this.toast.show(`${count} partido(s) importado(s) ✅`, 'success');
+      const { created, skipped } = await this.importService.importMatches(file);
+      const skippedText = skipped > 0 ? ` (${skipped} ya existían, no se tocaron)` : '';
+      this.toast.show(`${created} partido(s) nuevo(s) importado(s)${skippedText} ✅`, 'success');
       this.renderResultsForm();
       this.renderPredictionsOverview();
     } catch (error) {

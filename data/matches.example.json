@@ -20,13 +20,13 @@
       "venue": "Estadio Ejemplo 2"
     },
     {
-        "phase": "ro32",
-        "matchNumber": 75,
-        "date": "2026-06-29",
-        "time": "18:00",
-        "teamA": "Paises Bajos",
-        "teamB": "Marruecos",
-        "venue": "Estadio Ejemplo 3"
+      "phase": "ro32",
+      "matchNumber": 75,
+      "date": "2026-06-29",
+      "time": "18:00",
+      "teamA": "Paises Bajos",
+      "teamB": "Marruecos",
+      "venue": "Estadio Ejemplo 3"
     },
     {
       "phase": "ro32",
@@ -74,54 +74,86 @@
       "venue": "Estadio Ejemplo 2"
     },
     {
-        "phase": "ro32",
-        "matchNumber": 81,
-        "date": "2026-07-01",
-        "time": "18:00",
-        "teamA": "Estados Unidos",
-        "teamB": "Bosnia y Herzegovina",
-        "venue": "Estadio Ejemplo 3"
+      "phase": "ro32",
+      "matchNumber": 81,
+      "date": "2026-07-01",
+      "time": "18:00",
+      "teamA": "Estados Unidos",
+      "teamB": "Bosnia y Herzegovina",
+      "venue": "Estadio Ejemplo 3"
     },
     {
-        "phase": "ro32",
-        "matchNumber": 82,
-        "date": "2026-07-02",
-        "time": "15:00",
-        "teamA": "España",
-        "teamB": "Austria",
-        "venue": "Estadio Ejemplo 1"
+      "phase": "ro32",
+      "matchNumber": 82,
+      "date": "2026-07-02",
+      "time": "15:00",
+      "teamA": "España",
+      "teamB": "Austria",
+      "venue": "Estadio Ejemplo 1"
     },
     {
-        "phase": "ro32",
-        "matchNumber": 83,
-        "date": "2026-07-02",
-        "time": "19:00",
-        "teamA": "Portugal",
-        "teamB": "Croacia",
-        "venue": "Estadio Ejemplo 2"
+      "phase": "ro32",
+      "matchNumber": 83,
+      "date": "2026-07-02",
+      "time": "19:00",
+      "teamA": "Portugal",
+      "teamB": "Croacia",
+      "venue": "Estadio Ejemplo 2"
     },
     {
-        "phase": "ro32",
-        "matchNumber": 84,
-        "date": "2026-07-02",
-        "time": "23:00",
-        "teamA": "Suiza",
-        "teamB": "Argelia",
-        "venue": "Estadio Ejemplo 3"
+      "phase": "ro32",
+      "matchNumber": 84,
+      "date": "2026-07-02",
+      "time": "23:00",
+      "teamA": "Suiza",
+      "teamB": "Argelia",
+      "venue": "Estadio Ejemplo 3"
     },
-    
-
+    {
+      "phase": "ro32",
+      "matchNumber": 85,
+      "date": "2026-07-03",
+      "time": "14:00",
+      "teamA": "Australia",
+      "teamB": "Egipto",
+      "venue": "Estadio Ejemplo 1"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 86,
+      "date": "2026-07-03",
+      "time": "18:00",
+      "teamA": "Argentina",
+      "teamB": "Cabo Verde",
+      "venue": "Estadio Ejemplo 2"
+    },
+    {
+      "phase": "ro32",
+      "matchNumber": 87,
+      "date": "2026-07-03",
+      "time": "21:30",
+      "teamA": "Colombia",
+      "teamB": "Ghana",
+      "venue": "Estadio Ejemplo 3"
+    },
     {
       "phase": "ro16",
       "matchNumber": 89,
-      "date": "2026-07-05",
-      "time": "12:00",
-      "teamA": "Ganador Partido 73",
-      "teamB": "Ganador Partido 74",
+      "date": "2026-07-04",
+      "time": "13:00",
+      "teamA": "Canada",
+      "teamB": "Marruecos",
       "venue": "Estadio Ejemplo 1"
     },
-
-
+    {
+      "phase": "ro16",
+      "matchNumber": 90,
+      "date": "2026-07-04",
+      "time": "17:00",
+      "teamA": "Paraguay",
+      "teamB": "Francia",
+      "venue": "Estadio Ejemplo 1"
+    },
     {
       "phase": "quarters",
       "matchNumber": 97,
@@ -131,8 +163,6 @@
       "teamB": "Ganador Octavos 2",
       "venue": "Estadio Ejemplo 4"
     },
-
-
     {
       "phase": "semis",
       "matchNumber": 101,
@@ -142,8 +172,6 @@
       "teamB": "Ganador Cuartos 2",
       "venue": "Estadio Ejemplo 5"
     },
-
-
     {
       "phase": "final",
       "matchNumber": 104,

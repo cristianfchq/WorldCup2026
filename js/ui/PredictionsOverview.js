@@ -1,11 +1,13 @@
 import { groupMatchesByDate, formatReadableDate } from '../utils/DateUtils.js';
 import { PHASES } from '../config/app-config.js';
 import { BET_AMOUNT_BS } from '../config/payment-config.js';
+import { TabsComponent } from './TabsComponent.js';
 
 /**
- * Vista para el admin: por cada partido, muestra el pronóstico de TODOS los
- * participantes (o "Sin pronóstico" si todavía no pronosticó), agrupado por
- * fase y fecha igual que la vista pública. Si un pronóstico ya está
+ * Vista para el admin: tabs por fase (16vos, 8vos, cuartos, semifinal,
+ * final), y dentro de cada una, por cada partido, muestra el pronóstico de
+ * TODOS los participantes (o "Sin pronóstico" si todavía no pronosticó),
+ * agrupado por fecha igual que la vista pública. Si un pronóstico ya está
  * bloqueado, ofrece un botón para desbloquearlo (por si el participante se
  * equivocó). También registra, por partido, si cada participante ya pagó su
  * apuesta, con un total recaudado al pie de cada tabla.
@@ -20,6 +22,8 @@ export class PredictionsOverview {
     this.container = containerElement;
     this.onUnlock = onUnlock;
     this.onToggleBet = onToggleBet;
+    this.activePhase = PHASES[0].key;
+    this.lastData = null; // se guarda para poder cambiar de tab sin pedirle nada a admin.js
   }
 
   /**
@@ -31,7 +35,15 @@ export class PredictionsOverview {
    *        de apuestas, agrupados por matchId.
    */
   render(matches, participants, predictionsByMatchId, betsByMatchId) {
+    this.lastData = { matches, participants, predictionsByMatchId, betsByMatchId };
+    this.renderContent();
+  }
+
+  renderContent() {
     this.container.innerHTML = '';
+    if (!this.lastData) return;
+
+    const { matches, participants, predictionsByMatchId, betsByMatchId } = this.lastData;
 
     if (matches.length === 0) {
       this.container.innerHTML = '<p class="empty-state">Todavía no hay partidos importados.</p>';
@@ -42,29 +54,44 @@ export class PredictionsOverview {
       return;
     }
 
-    for (const phase of PHASES) {
-      const matchesOfPhase = matches.filter((m) => m.phase === phase.key);
-      if (matchesOfPhase.length === 0) continue;
+    const tabsBar = document.createElement('nav');
+    tabsBar.className = 'phase-tabs';
+    this.container.appendChild(tabsBar);
 
-      const phaseHeading = document.createElement('h3');
-      phaseHeading.className = 'match-day__title';
-      phaseHeading.textContent = phase.label;
-      this.container.appendChild(phaseHeading);
+    const phaseContent = document.createElement('div');
+    this.container.appendChild(phaseContent);
 
-      const groups = groupMatchesByDate(matchesOfPhase);
-      for (const [date, matchesOfDate] of groups) {
-        const dateHeading = document.createElement('p');
-        dateHeading.style.color = 'var(--color-text-muted)';
-        dateHeading.style.textTransform = 'capitalize';
-        dateHeading.textContent = formatReadableDate(date);
-        this.container.appendChild(dateHeading);
+    new TabsComponent(tabsBar, PHASES, {
+      initialKey: this.activePhase,
+      onChange: (key) => {
+        this.activePhase = key;
+        this.renderPhaseContent(phaseContent, matches, participants, predictionsByMatchId, betsByMatchId);
+      },
+    });
 
-        matchesOfDate.forEach((match) => {
-          this.container.appendChild(
-            this.renderMatchTable(match, participants, predictionsByMatchId, betsByMatchId)
-          );
-        });
-      }
+    this.renderPhaseContent(phaseContent, matches, participants, predictionsByMatchId, betsByMatchId);
+  }
+
+  renderPhaseContent(container, matches, participants, predictionsByMatchId, betsByMatchId) {
+    container.innerHTML = '';
+
+    const matchesOfPhase = matches.filter((m) => m.phase === this.activePhase);
+    if (matchesOfPhase.length === 0) {
+      container.innerHTML = '<p class="empty-state">Todavía no hay partidos importados en esta fase.</p>';
+      return;
+    }
+
+    const groups = groupMatchesByDate(matchesOfPhase);
+    for (const [date, matchesOfDate] of groups) {
+      const dateHeading = document.createElement('p');
+      dateHeading.style.color = 'var(--color-text-muted)';
+      dateHeading.style.textTransform = 'capitalize';
+      dateHeading.textContent = formatReadableDate(date);
+      container.appendChild(dateHeading);
+
+      matchesOfDate.forEach((match) => {
+        container.appendChild(this.renderMatchTable(match, participants, predictionsByMatchId, betsByMatchId));
+      });
     }
   }
 

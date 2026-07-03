@@ -68,8 +68,9 @@ classDiagram
 
     class ParticipantRepository {
         +getAll() Participant[]
+        +getById(id) Participant
         +save(participant) void
-        +createFromName(name) Participant
+        +createIfNotExists(name) Boolean
     }
 
     class MatchRepository {
