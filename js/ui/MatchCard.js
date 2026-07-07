@@ -6,12 +6,19 @@
  *   se muestra "Sin pronóstico" en vez de inputs vacíos, con "🚫 Apuestas cerradas".
  * - Ninguno de los anteriores: formulario editable normal, con la opción de
  *   marcar "Penales" cuando el pronóstico es un empate.
+ *
+ * Si YA existe un registro de Prediction, su campo `locked` manda por
+ * encima del cierre global del partido (match.bettingClosed): así el admin
+ * puede usar "🔓 Desbloquear" en el panel para dar una excepción puntual a
+ * un participante aunque las apuestas ya estén cerradas para todos los
+ * demás. Sin ningún registro, se usa el cierre global del partido.
  */
 export class MatchCard {
-  constructor(match, prediction, { onSave }) {
+  constructor(match, prediction, { onSave, onViewPredictions }) {
     this.match = match;
     this.prediction = prediction;
     this.onSave = onSave;
+    this.onViewPredictions = onViewPredictions;
   }
 
   get isSubmitted() {
@@ -19,11 +26,12 @@ export class MatchCard {
   }
 
   get isClosedWithoutPrediction() {
-    return Boolean(this.match.bettingClosed) && !this.isSubmitted;
+    return Boolean(this.match.bettingClosed) && !this.prediction;
   }
 
   get isLocked() {
-    return this.isSubmitted || Boolean(this.match.bettingClosed);
+    if (this.prediction) return this.prediction.locked;
+    return Boolean(this.match.bettingClosed);
   }
 
   render() {
@@ -32,7 +40,7 @@ export class MatchCard {
 
     const badge = this.isSubmitted
       ? '<span class="badge badge--locked">🔒 Enviado</span>'
-      : this.match.bettingClosed
+      : this.isClosedWithoutPrediction
         ? '<span class="badge badge--closed">🚫 Apuestas cerradas</span>'
         : '';
 
@@ -86,13 +94,26 @@ export class MatchCard {
                 <button type="button" class="btn penalty-choice" data-team="teamB">${this.match.teamB}</button>
               </div>
             </div>
+          `
+      }
+      ${
+        this.isClosedWithoutPrediction
+          ? ''
+          : `
             <div class="match-card__actions">
               <button type="button" class="btn penalty-toggle-btn">🎯 Penales</button>
               <button type="button" class="btn btn--primary match-card__save">Guardar pronóstico</button>
             </div>
           `
       }
+      <div class="match-card__view-predictions-wrapper">
+        <button type="button" class="btn match-card__view-predictions">👀 Ver pronósticos</button>
+      </div>
     `;
+
+    article.querySelector('.match-card__view-predictions').addEventListener('click', () => {
+      this.onViewPredictions(this.match);
+    });
 
     if (this.isClosedWithoutPrediction) return article;
 

@@ -6,6 +6,14 @@ import { SCORING_RULES } from '../config/scoring-config.js';
  * así que solo puede existir UN pronóstico por persona y partido.
  * Si el participante marcó "va a penales", wentToPenalties queda en true y
  * penaltyWinner indica a quién eligió como clasificado ('teamA' | 'teamB').
+ *
+ * `hasSubmitted` distingue un pronóstico REAL del participante de un
+ * "placeholder" que crea el admin al usar "🔓 Desbloquear" con alguien que
+ * nunca pronosticó (nace en 0-0 sin bloquear, porque las reglas de
+ * Firestore exigen un marcador numérico al crear el documento). Sin este
+ * campo, ese 0-0 de relleno se contaría como un acierto real si el partido
+ * termina justo 0-0. Por defecto es `true` (cualquier guardado normal desde
+ * MatchCard cuenta), y admin.js lo pone en `false` solo para el placeholder.
  */
 export class Prediction {
   constructor({
@@ -19,6 +27,7 @@ export class Prediction {
     points = null,
     wentToPenalties = false,
     penaltyWinner = null,
+    hasSubmitted = true,
   }) {
     this.id = id;
     this.matchId = matchId;
@@ -30,6 +39,7 @@ export class Prediction {
     this.points = points;
     this.wentToPenalties = wentToPenalties;
     this.penaltyWinner = penaltyWinner;
+    this.hasSubmitted = hasSubmitted;
   }
 
   static buildId(matchId, participantId) {
@@ -51,6 +61,7 @@ export class Prediction {
       points: this.points,
       wentToPenalties: this.wentToPenalties,
       penaltyWinner: this.penaltyWinner,
+      hasSubmitted: this.hasSubmitted,
     };
   }
 
@@ -59,7 +70,7 @@ export class Prediction {
    * resultado real de un partido. No muta el objeto, devuelve el número.
    */
   computePoints(match) {
-    if (!match.hasRealResult) return null;
+    if (!match.hasRealResult || !this.hasSubmitted) return null;
 
     const exactScoreMatch = this.scoreA === match.realScoreA && this.scoreB === match.realScoreB;
 
@@ -88,7 +99,7 @@ export class Prediction {
    * si el partido fue a penales, también a quién eligió como clasificado).
    */
   guessedExactResult(match) {
-    if (!match.hasRealResult) return false;
+    if (!match.hasRealResult || !this.hasSubmitted) return false;
 
     const exactScoreMatch = this.scoreA === match.realScoreA && this.scoreB === match.realScoreB;
     if (!exactScoreMatch) return false;

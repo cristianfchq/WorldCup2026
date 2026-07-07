@@ -219,6 +219,21 @@
   flex: 1;
 }
 
+.match-card__view-predictions-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.6rem;
+}
+
+.match-card__view-predictions {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 320px;
+}
+
 .penalty-toggle-btn {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -295,6 +310,12 @@
 .match-card__no-bet {
   font-style: italic;
   color: var(--color-text-muted);
+}
+
+.real-result-badge {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-primary-dark);
 }
 
 /* --- Leaderboard --- */
@@ -451,6 +472,50 @@
 .modal-card__icon {
   font-size: 2.5rem;
   margin: 0 0 0.5rem;
+}
+
+/* --- Modal "Ver pronósticos" (pronóstico de todos los participantes de un partido) --- */
+.modal-card--predictions {
+  position: relative;
+  text-align: left;
+  width: min(560px, 92vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem 1.5rem 1.25rem;
+}
+
+.modal-card--predictions h2 {
+  margin: 0 1.8rem 0.3rem 0;
+  font-size: 1.15rem;
+}
+
+.modal-card__result {
+  margin: 0 0 1rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.modal-card__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.9rem;
+}
+
+.modal-card__table-wrapper {
+  overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .modal-card--predictions {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
 }
 
 @media (min-width: 640px) {

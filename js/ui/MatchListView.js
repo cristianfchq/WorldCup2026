@@ -2,9 +2,10 @@ import { MatchCard } from './MatchCard.js';
 
 /** Pinta los partidos de la fecha activa (la fase y la fecha ya las eligen los tabs de arriba). */
 export class MatchListView {
-  constructor(containerElement, { onSavePrediction }) {
+  constructor(containerElement, { onSavePrediction, onViewPredictions }) {
     this.container = containerElement;
     this.onSavePrediction = onSavePrediction;
+    this.onViewPredictions = onViewPredictions;
   }
 
   render(matches, predictionsByMatchId) {
@@ -20,6 +21,7 @@ export class MatchListView {
     matches.forEach((match) => {
       const card = new MatchCard(match, predictionsByMatchId.get(match.id), {
         onSave: this.onSavePrediction,
+        onViewPredictions: this.onViewPredictions,
       });
       list.appendChild(card.render());
     });

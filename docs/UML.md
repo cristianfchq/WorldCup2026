@@ -41,10 +41,12 @@ classDiagram
         +Number points
         +Boolean wentToPenalties
         +String penaltyWinner
+        +Boolean hasSubmitted
         +buildId(matchId, participantId)$ String
         +fromFirestore(id, data)$ Prediction
         +toFirestore() Object
         +computePoints(match) Number
+        +guessedExactResult(match) Boolean
     }
 
     class Bet {
@@ -101,13 +103,11 @@ classDiagram
     class ScoringService {
         -matchRepository
         -predictionRepository
-        -participantRepository
-        -betRepository
         +recalculateForMatch(matchId) Prediction[]
         +recalculateAll() Number
-        +buildLeaderboard() Array
-        +buildParticipantHistory(participantId) Array
-        +buildDebtsSummary(participantId) Object
+        +buildLeaderboard(allPredictions) Array
+        +buildParticipantHistory(participantId, matches, allPredictions, participantsCount) Array
+        +buildDebtsSummary(participantId, matches, allBets) Object
     }
 
     class ImportService {

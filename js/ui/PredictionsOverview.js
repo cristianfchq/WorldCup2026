@@ -114,6 +114,14 @@ export class PredictionsOverview {
       match.wentToPenalties && matchWasRealTie
         ? `${match.teamA} vs ${match.teamB} (clasificó ${match.penaltyWinner === 'teamA' ? match.teamA : match.teamB} por penales)`
         : `${match.teamA} vs ${match.teamB}`;
+
+    if (match.hasRealResult) {
+      const realResult = document.createElement('span');
+      realResult.className = 'real-result-badge';
+      realResult.textContent = ` · Resultado real: ${match.realScoreA} - ${match.realScoreB}`;
+      title.appendChild(realResult);
+    }
+
     wrapper.appendChild(title);
 
     const table = document.createElement('table');
@@ -158,14 +166,20 @@ export class PredictionsOverview {
         prediction?.wentToPenalties && predictionIsTie
           ? ` (🎯 ${prediction.penaltyWinner === 'teamA' ? match.teamA : match.teamB})`
           : '';
-      const score = prediction ? `${prediction.scoreA} - ${prediction.scoreB}${penaltyPick}` : '—';
-      const status = prediction
-        ? prediction.locked
-          ? '🔒 Enviado'
-          : 'Guardado (sin bloquear)'
-        : match.bettingClosed
+      // El pronóstico "placeholder" (hasSubmitted: false) que crea
+      // "🔓 Desbloquear" para alguien que nunca pronosticó nace en 0-0 solo
+      // porque Firestore exige un marcador numérico al crear el documento;
+      // no es un pronóstico real, así que no se muestra como tal.
+      const score = prediction?.hasSubmitted ? `${prediction.scoreA} - ${prediction.scoreB}${penaltyPick}` : '—';
+      const status = !prediction
+        ? match.bettingClosed
           ? 'Sin pronóstico (apuestas cerradas)'
-          : 'Sin pronóstico';
+          : 'Sin pronóstico'
+        : !prediction.hasSubmitted
+          ? 'Habilitado (aún no pronosticó)'
+          : prediction.locked
+            ? '🔒 Enviado'
+            : 'Guardado (sin bloquear)';
       const wonAmount = isWinner ? `Bs ${formatBs(amountPerWinner)}` : '—';
       const totalToPay = isWinner ? `Bs ${formatBs(projectedAmountPerWinner)}` : '—';
 
@@ -184,12 +198,16 @@ export class PredictionsOverview {
       betButton.addEventListener('click', () => this.onToggleBet(match.id, participant, !isPaid));
       betCell.appendChild(betButton);
 
-      if (prediction?.locked) {
+      // El botón aparece si está bloqueado (para desbloquearlo) o si el
+      // participante todavía no tiene ningún pronóstico (para habilitarle
+      // una excepción puntual, aunque las apuestas ya estén cerradas para
+      // los demás). Si ya está guardado pero sin bloquear, no hace falta.
+      if (!prediction || prediction.locked) {
         const unlockButton = document.createElement('button');
         unlockButton.type = 'button';
         unlockButton.className = 'btn';
         unlockButton.textContent = '🔓 Desbloquear';
-        unlockButton.addEventListener('click', () => this.onUnlock(prediction));
+        unlockButton.addEventListener('click', () => this.onUnlock(match, participant, prediction || null));
         row.lastElementChild.appendChild(unlockButton);
       }
 

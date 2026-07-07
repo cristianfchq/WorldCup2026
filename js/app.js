@@ -4,6 +4,7 @@ import { PredictionRepository } from './services/PredictionRepository.js';
 import { BetRepository } from './services/BetRepository.js';
 import { ScoringService } from './services/ScoringService.js';
 import { Prediction } from './models/Prediction.js';
+import { BET_AMOUNT_BS } from './config/payment-config.js';
 import { ThemeToggle } from './ui/ThemeToggle.js';
 import { ParticipantSelector } from './ui/ParticipantSelector.js';
 import { PhaseTabs } from './ui/PhaseTabs.js';
@@ -14,6 +15,7 @@ import { ParticipantHistory } from './ui/ParticipantHistory.js';
 import { ParticipantDebts } from './ui/ParticipantDebts.js';
 import { Toast } from './ui/Toast.js';
 import { WelcomeModal } from './ui/WelcomeModal.js';
+import { MatchPredictionsModal } from './ui/MatchPredictionsModal.js';
 import { findMostRelevantMatch } from './utils/DateUtils.js';
 import { StorageUtils } from './utils/StorageUtils.js';
 
@@ -23,6 +25,12 @@ import { StorageUtils } from './utils/StorageUtils.js';
  *      guardado en localStorage para las próximas visitas.
  *   2) Pronósticos (#main-content): fase -> fecha -> partidos de esa fecha,
  *      con la fecha de hoy auto-seleccionada, y tabla de posiciones.
+ *
+ * Partidos, TODOS los pronósticos y TODAS las apuestas se traen UNA sola
+ * vez por sesión (loadSharedData) y se cachean en memoria. Cambiar de
+ * fase/fecha/participante nunca vuelve a leer Firestore: todo se recalcula
+ * desde esa copia. Solo el botón "🔄 Actualizar" o recargar la página
+ * traen datos frescos (ver memoria "gameproject-firestore-read-optimization").
  */
 class PredictionsApp {
   constructor() {
@@ -30,19 +38,17 @@ class PredictionsApp {
     this.matchRepository = new MatchRepository();
     this.predictionRepository = new PredictionRepository();
     this.betRepository = new BetRepository();
-    this.scoringService = new ScoringService(
-      this.matchRepository,
-      this.predictionRepository,
-      this.participantRepository,
-      this.betRepository
-    );
+    this.scoringService = new ScoringService(this.matchRepository, this.predictionRepository);
 
     this.participants = [];
     this.matches = [];
+    this.allPredictions = [];
+    this.allBets = [];
     this.predictionsByMatchId = new Map();
     this.selectedParticipantId = StorageUtils.getSelectedParticipantId();
     this.activePhase = null;
     this.activeDate = null;
+    this.isSharedDataReady = false;
   }
 
   mount() {
@@ -54,7 +60,7 @@ class PredictionsApp {
     this.gateSelector = new ParticipantSelector(document.getElementById('gate-select'), {
       onSelect: (id) => {
         this.pendingParticipantId = id;
-        this.gateEnterBtn.disabled = !id;
+        this.updateGateEnterButton();
       },
     });
 
@@ -63,6 +69,9 @@ class PredictionsApp {
     });
 
     document.getElementById('change-participant-btn').addEventListener('click', () => this.showGate());
+
+    const refreshBtn = document.getElementById('refresh-data-btn');
+    if (refreshBtn) refreshBtn.addEventListener('click', () => this.refreshAllData());
 
     this.phaseTabs = new PhaseTabs(document.getElementById('phase-tabs'), {
       onChange: (phase) => this.handlePhaseChange(phase),
@@ -75,6 +84,7 @@ class PredictionsApp {
     this.matchListView = new MatchListView(document.getElementById('match-list'), {
       onSavePrediction: (matchId, scoreA, scoreB, penaltyInfo) =>
         this.handleSavePrediction(matchId, scoreA, scoreB, penaltyInfo),
+      onViewPredictions: (match) => this.handleViewPredictions(match),
     });
 
     this.leaderboard = new Leaderboard(document.getElementById('leaderboard'));
@@ -82,6 +92,7 @@ class PredictionsApp {
     this.participantDebts = new ParticipantDebts(document.getElementById('participant-debts'));
     this.toast = new Toast(document.getElementById('toast-container'));
     this.welcomeModal = new WelcomeModal();
+    this.matchPredictionsModal = new MatchPredictionsModal();
 
     this.loadInitialData();
   }
@@ -95,15 +106,57 @@ class PredictionsApp {
     const knownParticipant = this.participants.find((p) => p.id === this.selectedParticipantId);
     this.pendingParticipantId = knownParticipant ? knownParticipant.id : null;
     this.gateSelector.render(this.participants, this.pendingParticipantId);
-    this.gateEnterBtn.disabled = !this.pendingParticipantId;
+    this.updateGateEnterButton();
 
-    this.matches = await this.matchRepository.getAll();
+    await this.loadSharedData();
 
     // La fase que contiene los partidos de hoy (o la más cercana) se abre
     // por defecto; dentro de ella, DateTabs auto-selecciona la fecha de hoy.
     const relevantMatch = findMostRelevantMatch(this.matches);
     this.activePhase = relevantMatch ? relevantMatch.phase : this.phaseTabs.activePhase;
     this.phaseTabs.setActive(this.activePhase);
+  }
+
+  /**
+   * Trae partidos, TODOS los pronósticos y TODAS las apuestas de una sola
+   * vez, y los cachea en memoria. Se llama al entrar y desde "🔄 Actualizar".
+   */
+  async loadSharedData() {
+    this.isSharedDataReady = false;
+    const [matches, allPredictions, allBets] = await Promise.all([
+      this.matchRepository.getAll(),
+      this.predictionRepository.getAll(),
+      this.betRepository.getAll(),
+    ]);
+    this.matches = matches;
+    this.allPredictions = allPredictions;
+    this.allBets = allBets;
+    this.isSharedDataReady = true;
+    this.updateGateEnterButton();
+  }
+
+  /** Handler del botón "🔄 Actualizar": única forma de traer datos frescos aparte de recargar la página. */
+  async refreshAllData() {
+    await this.loadSharedData();
+    if (this.selectedParticipantId) {
+      await this.loadPredictionsForSelectedParticipant();
+      this.renderMatchesForActiveDate();
+      this.refreshLeaderboard();
+      this.refreshParticipantHistory();
+      this.refreshParticipantDebts();
+    }
+    this.toast.show('Datos actualizados ✅', 'success');
+  }
+
+  /**
+   * Centraliza cuándo se habilita "Ingresar": requiere un nombre elegido Y
+   * los datos compartidos ya cargados, para evitar entrar con las tablas
+   * (posiciones, mis apuestas, mis deudas) vacías por una condición de
+   * carrera. Se llama desde todos los lugares donde cualquiera de las dos
+   * condiciones puede cambiar.
+   */
+  updateGateEnterButton() {
+    this.gateEnterBtn.disabled = !(this.pendingParticipantId && this.isSharedDataReady);
   }
 
   /** Paso 1: se elige (o ya se conocía) el participante -> pasar al paso 2. */
@@ -115,9 +168,9 @@ class PredictionsApp {
     StorageUtils.setSelectedParticipantId(participantId);
     await this.loadPredictionsForSelectedParticipant();
     this.renderMatchesForActiveDate();
-    await this.refreshLeaderboard();
-    await this.refreshParticipantHistory();
-    await this.refreshParticipantDebts();
+    this.refreshLeaderboard();
+    this.refreshParticipantHistory();
+    this.refreshParticipantDebts();
 
     this.showMainContent(participant.name);
     this.welcomeModal.show(participant.name);
@@ -131,6 +184,9 @@ class PredictionsApp {
     label.textContent = `Hola, ${participantName}`;
     label.hidden = false;
     document.getElementById('change-participant-btn').hidden = false;
+
+    const refreshBtn = document.getElementById('refresh-data-btn');
+    if (refreshBtn) refreshBtn.hidden = false;
   }
 
   /** Vuelve al paso 1 para elegir otro nombre (ej. alguien más usa el mismo celular). */
@@ -145,23 +201,23 @@ class PredictionsApp {
     document.getElementById('current-participant-label').hidden = true;
     document.getElementById('change-participant-btn').hidden = true;
 
+    const refreshBtn = document.getElementById('refresh-data-btn');
+    if (refreshBtn) refreshBtn.hidden = true;
+
     this.gateSelector.render(this.participants, null);
-    this.gateEnterBtn.disabled = true;
+    this.updateGateEnterButton();
   }
 
   async loadPredictionsForSelectedParticipant() {
-    const predictions = await this.predictionRepository.getByParticipant(this.selectedParticipantId);
+    const predictions = this.allPredictions.filter((p) => p.participantId === this.selectedParticipantId);
     this.predictionsByMatchId = new Map(predictions.map((p) => [p.matchId, p]));
   }
 
-  /** Al cambiar de fase, se recalculan las fechas disponibles de ESA fase (DateTabs se auto-selecciona sola). */
+  /** Al cambiar de fase, se recalculan las fechas disponibles de ESA fase (DateTabs se auto-selecciona sola). No vuelve a leer Firestore ni recalcula posiciones/apuestas/deudas: esas no dependen de la fase activa. */
   handlePhaseChange(phase) {
     this.activePhase = phase;
     const datesOfPhase = [...new Set(this.matches.filter((m) => m.phase === phase).map((m) => m.date))].sort();
     this.dateTabs.setDates(datesOfPhase);
-    this.refreshLeaderboard();
-    this.refreshParticipantHistory();
-    this.refreshParticipantDebts();
   }
 
   handleDateChange(date) {
@@ -174,24 +230,61 @@ class PredictionsApp {
     this.matchListView.render(matchesOfDate, this.predictionsByMatchId);
   }
 
-  /** Se llama al entrar y cada vez que se cambia de fase, para reflejar resultados que el admin haya cargado mientras tanto. */
-  async refreshLeaderboard() {
-    const leaderboardRows = await this.scoringService.buildLeaderboard();
+  /** Cálculo puro desde this.allPredictions (ya cacheado), sin leer Firestore. */
+  refreshLeaderboard() {
+    const leaderboardRows = this.scoringService.buildLeaderboard(this.allPredictions);
     this.leaderboard.render(leaderboardRows);
   }
 
   /** Igual que refreshLeaderboard(), pero para la tabla personal "Mis apuestas" del participante logueado. */
-  async refreshParticipantHistory() {
+  refreshParticipantHistory() {
     if (!this.selectedParticipantId) return;
-    const rows = await this.scoringService.buildParticipantHistory(this.selectedParticipantId);
+    const rows = this.scoringService.buildParticipantHistory(
+      this.selectedParticipantId,
+      this.matches,
+      this.allPredictions,
+      this.participants.length
+    );
     this.participantHistory.render(rows);
   }
 
   /** Igual que refreshParticipantHistory(), pero para "Mis deudas" (qué debería pagar / ya pagó / le falta). */
-  async refreshParticipantDebts() {
+  refreshParticipantDebts() {
     if (!this.selectedParticipantId) return;
-    const summary = await this.scoringService.buildDebtsSummary(this.selectedParticipantId);
+    const summary = this.scoringService.buildDebtsSummary(this.selectedParticipantId, this.matches, this.allBets);
     this.participantDebts.render(summary);
+  }
+
+  /**
+   * Abre el modal "Ver pronósticos" de un partido: pronóstico de TODOS los
+   * participantes y cuánto le tocaría a cada uno si gana. Se arma desde
+   * this.allPredictions/this.participants, ya cacheados en memoria, sin
+   * volver a leer Firestore.
+   */
+  handleViewPredictions(match) {
+    const predictionsForMatch = this.allPredictions.filter((p) => p.matchId === match.id);
+    const predictionByParticipant = new Map(predictionsForMatch.map((p) => [p.participantId, p]));
+
+    const winnersCount = predictionsForMatch.filter((p) => p.guessedExactResult(match)).length;
+    const projectedPool = this.participants.length * BET_AMOUNT_BS;
+    const amountPerWinner = winnersCount > 0 ? projectedPool / winnersCount : 0;
+
+    const rows = this.participants.map((participant) => {
+      const prediction = predictionByParticipant.get(participant.id) || null;
+      const isWinner = Boolean(prediction?.guessedExactResult(match));
+
+      const predictionIsTie = Boolean(prediction) && prediction.scoreA === prediction.scoreB;
+      const penaltyPick =
+        prediction?.wentToPenalties && predictionIsTie
+          ? ` (🎯 ${prediction.penaltyWinner === 'teamA' ? match.teamA : match.teamB})`
+          : '';
+      const predictionLabel = prediction ? `${prediction.scoreA} - ${prediction.scoreB}${penaltyPick}` : 'Sin pronóstico';
+      const amountLabel = isWinner ? `Bs ${formatBs(amountPerWinner)}` : '—';
+
+      return { participantName: participant.name, predictionLabel, isWinner, amountLabel };
+    });
+
+    this.matchPredictionsModal.show(match, rows);
   }
 
   async handleSavePrediction(matchId, scoreA, scoreB, penaltyInfo = { wentToPenalties: false, penaltyWinner: null }) {
@@ -213,6 +306,12 @@ class PredictionsApp {
     try {
       await this.predictionRepository.save(prediction);
       this.predictionsByMatchId.set(matchId, prediction);
+
+      // Actualiza la copia en memoria en vez de volver a leer Firestore.
+      const index = this.allPredictions.findIndex((p) => p.id === prediction.id);
+      if (index >= 0) this.allPredictions[index] = prediction;
+      else this.allPredictions.push(prediction);
+
       this.renderMatchesForActiveDate();
       this.toast.show('Pronóstico guardado y bloqueado ✅', 'success');
     } catch (error) {
@@ -220,6 +319,11 @@ class PredictionsApp {
       this.toast.show('No se pudo guardar (¿ya estaba bloqueado?)', 'error');
     }
   }
+}
+
+/** Redondea a 2 decimales pero sin arrastrar ceros innecesarios (7.5, no 7.50). */
+function formatBs(amount) {
+  return Number(amount.toFixed(2));
 }
 
 new PredictionsApp().mount();

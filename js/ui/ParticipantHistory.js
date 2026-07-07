@@ -5,37 +5,41 @@
  * el total ganado en Bs.
  */
 export class ParticipantHistory {
-    constructor(containerElement) {
-        this.container = containerElement;
+  constructor(containerElement) {
+    this.container = containerElement;
+  }
+
+  render(rows) {
+    this.container.innerHTML = '';
+
+    if (rows.length === 0) {
+      this.container.innerHTML =
+        '<p class="empty-state">Todavía no hay partidos con resultado real cargado para tus pronósticos.</p>';
+      return;
     }
 
-    render(rows) {
-        this.container.innerHTML = '';
+    let totalWon = 0;
+    const bodyRows = rows
+      .map(({ match, prediction, isWinner, amountReceived }) => {
+        totalWon += amountReceived;
 
-        if (rows.length === 0) {
-            this.container.innerHTML =
-                '<p class="empty-state">Todavía no hay partidos con resultado real cargado para tus pronósticos.</p>';
-            return;
-        }
+        const realIsTie = match.hasRealResult && match.realScoreA === match.realScoreB;
+        const realResult =
+          match.wentToPenalties && realIsTie
+            ? `${match.realScoreA} - ${match.realScoreB} (🎯 ${match.penaltyWinner === 'teamA' ? match.teamA : match.teamB})`
+            : `${match.realScoreA} - ${match.realScoreB}`;
 
-        let totalWon = 0;
-        const bodyRows = rows
-            .map(({ match, prediction, isWinner, amountReceived }) => {
-                totalWon += amountReceived;
+        // Un pronóstico "placeholder" (hasSubmitted: false, creado por el
+        // admin al usar "🔓 Desbloquear" con alguien que nunca pronosticó)
+        // no es un pronóstico real: se muestra igual que "Sin pronóstico".
+        const myGuessIsTie = Boolean(prediction) && prediction.scoreA === prediction.scoreB;
+        const myGuess = !prediction?.hasSubmitted
+          ? 'Sin pronóstico'
+          : prediction.wentToPenalties && myGuessIsTie
+            ? `${prediction.scoreA} - ${prediction.scoreB} (🎯 ${prediction.penaltyWinner === 'teamA' ? match.teamA : match.teamB})`
+            : `${prediction.scoreA} - ${prediction.scoreB}`;
 
-                const realIsTie = match.hasRealResult && match.realScoreA === match.realScoreB;
-                const realResult =
-                    match.wentToPenalties && realIsTie
-                        ? `${match.realScoreA} - ${match.realScoreB} (🎯 ${match.penaltyWinner === 'teamA' ? match.teamA : match.teamB})`
-                        : `${match.realScoreA} - ${match.realScoreB}`;
-
-                const myGuessIsTie = prediction.scoreA === prediction.scoreB;
-                const myGuess =
-                    prediction.wentToPenalties && myGuessIsTie
-                        ? `${prediction.scoreA} - ${prediction.scoreB} (🎯 ${prediction.penaltyWinner === 'teamA' ? match.teamA : match.teamB})`
-                        : `${prediction.scoreA} - ${prediction.scoreB}`;
-
-                return `
+        return `
           <tr class="${isWinner ? 'row--correct' : ''}">
             <td>${match.teamA} vs ${match.teamB}</td>
             <td>${realResult}</td>
@@ -44,10 +48,10 @@ export class ParticipantHistory {
             <td class="${isWinner ? 'payments-summary-won' : ''}">${isWinner ? `Bs ${formatBs(amountReceived)}` : '—'}</td>
           </tr>
         `;
-            })
-            .join('');
+      })
+      .join('');
 
-        this.container.innerHTML = `
+    this.container.innerHTML = `
       <table class="leaderboard-table">
         <thead>
           <tr>
@@ -67,10 +71,10 @@ export class ParticipantHistory {
         </tbody>
       </table>
     `;
-    }
+  }
 }
 
 /** Redondea a 2 decimales pero sin arrastrar ceros innecesarios (7.5, no 7.50). */
 function formatBs(amount) {
-    return Number(amount.toFixed(2));
+  return Number(amount.toFixed(2));
 }

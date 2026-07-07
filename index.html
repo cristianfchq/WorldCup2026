@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,13 +9,13 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/animations.css" />
 </head>
-
 <body>
   <div class="app-shell">
     <header class="app-header">
       <h1 class="app-header__title">⚽ Pronósticos Mundial 2026</h1>
       <div class="app-header__controls">
         <span id="current-participant-label" class="current-participant" hidden></span>
+        <button id="refresh-data-btn" class="btn" type="button" hidden>🔄 Actualizar</button>
         <button id="change-participant-btn" class="btn" type="button" hidden>Cambiar</button>
         <button id="theme-toggle" class="icon-btn" type="button" aria-label="Cambiar tema">🌙</button>
       </div>
@@ -61,5 +60,4 @@
 
   <script type="module" src="js/app.js"></script>
 </body>
-
 </html>
