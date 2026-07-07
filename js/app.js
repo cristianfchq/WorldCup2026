@@ -88,7 +88,9 @@ class PredictionsApp {
     });
 
     this.leaderboard = new Leaderboard(document.getElementById('leaderboard'));
-    this.participantHistory = new ParticipantHistory(document.getElementById('participant-history'));
+    this.participantHistory = new ParticipantHistory(document.getElementById('participant-history'), {
+      onSelectMatch: (match) => this.handleViewPredictions(match),
+    });
     this.participantDebts = new ParticipantDebts(document.getElementById('participant-debts'));
     this.toast = new Toast(document.getElementById('toast-container'));
     this.welcomeModal = new WelcomeModal();

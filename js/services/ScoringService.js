@@ -76,6 +76,11 @@ export class ScoringService {
    * se calcula como si TODOS los participantes ya hubieran pagado (pozo =
    * cantidad total de participantes × BET_AMOUNT_BS), no según quién pagó
    * de verdad.
+   *
+   * `houseAmount` es esa misma proyección de pozo, pero para "Para Whisky":
+   * si NADIE acertó el marcador exacto de ese partido, el pozo completo no
+   * se reparte y queda para la casa (mismo criterio que "🏠 Para Whisky" en
+   * el Resumen de pagos del admin, aplicado partido por partido).
    */
   buildParticipantHistory(participantId, matches, allPredictions, participantsCount) {
     const predictionsByMatchId = new Map();
@@ -93,15 +98,12 @@ export class ScoringService {
       const predictionsForMatch = predictionsByMatchId.get(match.id) || [];
       const prediction = predictionsForMatch.find((p) => p.participantId === participantId) || null;
 
+      const winnersCount = predictionsForMatch.filter((p) => p.guessedExactResult(match)).length;
       const isWinner = Boolean(prediction?.guessedExactResult(match));
-      let amountReceived = 0;
+      const amountReceived = isWinner && winnersCount > 0 ? hypotheticalPool / winnersCount : 0;
+      const houseAmount = winnersCount === 0 ? hypotheticalPool : 0;
 
-      if (isWinner) {
-        const winnersCount = predictionsForMatch.filter((p) => p.guessedExactResult(match)).length;
-        amountReceived = winnersCount > 0 ? hypotheticalPool / winnersCount : 0;
-      }
-
-      rows.push({ match, prediction, isWinner, amountReceived });
+      rows.push({ match, prediction, isWinner, amountReceived, houseAmount });
     }
 
     rows.sort((a, b) => `${a.match.date}${a.match.time}`.localeCompare(`${b.match.date}${b.match.time}`));

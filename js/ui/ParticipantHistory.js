@@ -1,12 +1,19 @@
 /**
  * Historial personal de apuestas del participante logueado: un row por
  * partido con resultado real ya cargado, mostrando el marcador real, su
- * pronóstico, si acertó (✅/❌) y cuánto recibió por esa apuesta. Al pie,
- * el total ganado en Bs.
+ * pronóstico, si acertó (✅/❌), cuánto recibió por esa apuesta y cuánto de
+ * ese partido quedó "🏠 Para Whisky" (cuando NADIE acertó el marcador
+ * exacto, el pozo entero no se reparte y queda para la casa). Al pie, el
+ * total ganado y el total acumulado para whisky, en Bs.
+ *
+ * Si se pasa `onSelectMatch`, cada fila de partido se vuelve clickeable
+ * (igual que el botón "👀 Ver pronósticos" de la tarjeta del partido) y
+ * abre el mismo modal con el pronóstico de todos los participantes.
  */
 export class ParticipantHistory {
-  constructor(containerElement) {
+  constructor(containerElement, { onSelectMatch } = {}) {
     this.container = containerElement;
+    this.onSelectMatch = onSelectMatch;
   }
 
   render(rows) {
@@ -19,9 +26,11 @@ export class ParticipantHistory {
     }
 
     let totalWon = 0;
+    let totalHouse = 0;
     const bodyRows = rows
-      .map(({ match, prediction, isWinner, amountReceived }) => {
+      .map(({ match, prediction, isWinner, amountReceived, houseAmount }) => {
         totalWon += amountReceived;
+        totalHouse += houseAmount;
 
         const realIsTie = match.hasRealResult && match.realScoreA === match.realScoreB;
         const realResult =
@@ -39,38 +48,58 @@ export class ParticipantHistory {
             ? `${prediction.scoreA} - ${prediction.scoreB} (🎯 ${prediction.penaltyWinner === 'teamA' ? match.teamA : match.teamB})`
             : `${prediction.scoreA} - ${prediction.scoreB}`;
 
+        // Filas mutuamente excluyentes: verde si ESTE participante acertó,
+        // cálido/ámbar si NADIE acertó ese partido (pozo para la casa).
+        const rowStateClass = isWinner ? 'row--correct' : houseAmount > 0 ? 'row--house' : '';
+        const clickableClass = this.onSelectMatch ? ' row--clickable' : '';
         return `
-          <tr class="${isWinner ? 'row--correct' : ''}">
+          <tr class="${rowStateClass}${clickableClass}" data-match-id="${match.id}">
             <td>${match.teamA} vs ${match.teamB}</td>
             <td>${realResult}</td>
             <td>${myGuess}</td>
             <td>${isWinner ? '✅' : '❌'}</td>
             <td class="${isWinner ? 'payments-summary-won' : ''}">${isWinner ? `Bs ${formatBs(amountReceived)}` : '—'}</td>
+            <td>${houseAmount > 0 ? `Bs ${formatBs(houseAmount)}` : '—'}</td>
           </tr>
         `;
       })
       .join('');
 
     this.container.innerHTML = `
-      <table class="leaderboard-table">
-        <thead>
-          <tr>
-            <th>Partido</th>
-            <th>Resultado real</th>
-            <th>Mi pronóstico</th>
-            <th>Acierto</th>
-            <th>Monto recibido</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${bodyRows}
-          <tr class="payments-total-row">
-            <td colspan="4">Total ganado</td>
-            <td>Bs ${formatBs(totalWon)}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Partido</th>
+              <th>Resultado real</th>
+              <th>Mi pronóstico</th>
+              <th>Acierto</th>
+              <th>Monto recibido</th>
+              <th title="Cuando nadie acertó el marcador exacto, el pozo de ese partido queda para la casa">🏠 Para Whisky</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bodyRows}
+            <tr class="payments-total-row">
+              <td colspan="4">Total ganado</td>
+              <td>Bs ${formatBs(totalWon)}</td>
+              <td></td>
+            </tr>
+            <tr class="payments-total-row">
+              <td colspan="5">🏠 Para Whisky</td>
+              <td>Bs ${formatBs(totalHouse)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     `;
+
+    if (this.onSelectMatch) {
+      const matchesById = new Map(rows.map(({ match }) => [match.id, match]));
+      this.container.querySelectorAll('tbody tr[data-match-id]').forEach((tr) => {
+        tr.addEventListener('click', () => this.onSelectMatch(matchesById.get(tr.dataset.matchId)));
+      });
+    }
   }
 }
 

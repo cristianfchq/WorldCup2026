@@ -12,7 +12,11 @@
 
 @media (max-width: 640px) {
   .result-row {
-    grid-template-columns: 1fr 1fr;
+    /* En 2 columnas, "🎯 Penales activado" (white-space: nowrap) no entra
+       en ~170px y desborda la fila hacia los costados de la pantalla. Una
+       sola columna evita el desborde y además hace cada control más fácil
+       de tocar en el celular. */
+    grid-template-columns: 1fr;
   }
 }
 
@@ -108,11 +112,11 @@
   transition: transform var(--transition-fast);
 }
 
-.toggle-switch input:checked+.toggle-switch__track {
+.toggle-switch input:checked + .toggle-switch__track {
   background: var(--color-primary);
 }
 
-.toggle-switch input:checked+.toggle-switch__track .toggle-switch__thumb {
+.toggle-switch input:checked + .toggle-switch__track .toggle-switch__thumb {
   transform: translateX(18px);
 }
 

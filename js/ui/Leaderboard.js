@@ -24,12 +24,14 @@ export class Leaderboard {
       .join('');
 
     this.container.innerHTML = `
-      <table class="leaderboard-table">
-        <thead>
-          <tr><th>#</th><th>Participante</th><th># Aciertos</th><th>Partidos calificados</th></tr>
-        </thead>
-        <tbody>${items}</tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="leaderboard-table">
+          <thead>
+            <tr><th>#</th><th>Participante</th><th># Aciertos</th><th>Partidos calificados</th></tr>
+          </thead>
+          <tbody>${items}</tbody>
+        </table>
+      </div>
     `;
   }
 }

@@ -227,7 +227,12 @@ export class PredictionsOverview {
     tbody.appendChild(totalRow);
 
     table.appendChild(tbody);
-    wrapper.appendChild(table);
+
+    const tableScroll = document.createElement('div');
+    tableScroll.className = 'table-scroll';
+    tableScroll.appendChild(table);
+    wrapper.appendChild(tableScroll);
+
     return wrapper;
   }
 }

@@ -27,8 +27,8 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 50%;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -211,6 +211,7 @@
 
 .match-card__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.8rem;
 }
@@ -318,6 +319,12 @@
   color: var(--color-primary-dark);
 }
 
+/* Envuelve cualquier .leaderboard-table para que haga scroll horizontal en
+   vez de desbordar y romper el layout en pantallas angostas. */
+.table-scroll {
+  overflow-x: auto;
+}
+
 /* --- Leaderboard --- */
 .leaderboard-table {
   width: 100%;
@@ -349,6 +356,23 @@
 
 .row--correct td {
   font-weight: 600;
+}
+
+/* Resalta un partido donde NADIE acertó el marcador exacto: ese pozo entero
+   queda "Para Whisky" (la casa), en vez de repartirse. Color distinto (cálido)
+   al verde de .row--correct para no confundirlos. */
+.row--house {
+  background: var(--color-accent-soft);
+}
+
+/* Filas clickeables de "Mis apuestas": abren el mismo modal que "👀 Ver pronósticos" al hacer clic. */
+.row--clickable {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.row--clickable:hover {
+  background: var(--color-bg);
 }
 
 .payments-summary-won {
@@ -500,12 +524,13 @@
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   font-size: 0.9rem;
 }
 
 .modal-card__table-wrapper {
+  overflow-x: auto;
   overflow-y: auto;
 }
 

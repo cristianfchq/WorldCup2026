@@ -38,12 +38,14 @@ export class ParticipantDebts {
       .join('');
 
     this.container.innerHTML = `
-      <table class="leaderboard-table">
-        <thead>
-          <tr><th>Partido</th><th>Fecha</th><th>Pagado</th>${onTogglePaid ? '<th>Acción</th>' : ''}</tr>
-        </thead>
-        <tbody>${bodyRows}</tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="leaderboard-table">
+          <thead>
+            <tr><th>Partido</th><th>Fecha</th><th>Pagado</th>${onTogglePaid ? '<th>Acción</th>' : ''}</tr>
+          </thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>
       <div class="debts-summary">
         <div class="debts-summary__item">
           <span class="debts-summary__label">Total a pagar</span>

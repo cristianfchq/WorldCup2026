@@ -6,6 +6,7 @@
   --color-primary: #2f9e8f;
   --color-primary-dark: #1f7266;
   --color-accent: #f4a259;
+  --color-accent-soft: rgba(244, 162, 89, 0.18);
   --color-success: #4caf7d;
   --color-success-soft: rgba(76, 175, 125, 0.18);
   --color-danger: #e0637a;
@@ -32,6 +33,7 @@
   --color-primary: #4fc9b8;
   --color-primary-dark: #2f9e8f;
   --color-accent: #f4a259;
+  --color-accent-soft: rgba(244, 162, 89, 0.22);
   --color-success-soft: rgba(79, 201, 184, 0.22);
 
   --color-bg: #10201d;
