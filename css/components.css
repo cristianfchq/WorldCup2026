@@ -319,6 +319,71 @@
   color: white;
 }
 
+/* Resalta al participante que acertó el marcador exacto de un partido, una
+   vez que se cargó el resultado real (usado en el admin y en "Mis apuestas"
+   de la página pública). */
+.row--correct {
+  background: var(--color-success-soft);
+}
+
+.row--correct td {
+  font-weight: 600;
+}
+
+.payments-summary-won {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.payments-total-row td {
+  border-top: 2px solid var(--color-border);
+  padding-top: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.payments-summary-icon {
+  font-size: 1rem;
+}
+
+.payments-summary-pending {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+/* Resumen de totales debajo de la tabla de "Mis deudas". */
+.debts-summary {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--color-border);
+}
+
+.debts-summary__item {
+  flex: 1;
+  min-width: 140px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1rem;
+  text-align: center;
+}
+
+.debts-summary__label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.debts-summary__value {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
 /* --- Toasts --- */
 .toast-container {
   position: fixed;

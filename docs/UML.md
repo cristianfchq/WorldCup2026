@@ -77,7 +77,7 @@ classDiagram
         +getAll() Match[]
         +getById(id) Match
         +save(match) void
-        +createFromRaw(raw) Match
+        +createIfNotExists(raw) Boolean
         +saveRealResult(matchId, scoreA, scoreB) Match
         +setBettingClosed(matchId, closed) Match
     }
@@ -94,14 +94,20 @@ classDiagram
     class BetRepository {
         +getAll() Bet[]
         +getByMatch(matchId) Bet[]
+        +getByParticipant(participantId) Bet[]
         +setPaid(matchId, participant, paid) Bet
     }
 
     class ScoringService {
         -matchRepository
         -predictionRepository
+        -participantRepository
+        -betRepository
         +recalculateForMatch(matchId) Prediction[]
+        +recalculateAll() Number
         +buildLeaderboard() Array
+        +buildParticipantHistory(participantId) Array
+        +buildDebtsSummary(participantId) Object
     }
 
     class ImportService {

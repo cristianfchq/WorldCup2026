@@ -26,16 +26,6 @@
   color: var(--color-text);
 }
 
-/* Fila de "Ver todos los pronósticos": resalta al participante que acertó,
-   una vez que el admin cargó el resultado real de ese partido. */
-.row--correct {
-  background: var(--color-success-soft);
-}
-
-.row--correct td {
-  font-weight: 600;
-}
-
 /* Botón de estado de pago de apuesta, con colores amigables (no rojo/verde
    puros) para que combinen con el resto de la paleta. */
 .payment-toggle {
@@ -50,13 +40,6 @@
 
 .payment-toggle--unpaid {
   background: var(--color-danger);
-}
-
-.payments-total-row td {
-  border-top: 2px solid var(--color-border);
-  padding-top: 0.8rem;
-  font-weight: 700;
-  color: var(--color-primary-dark);
 }
 
 /* Matriz participante x partido de la pestaña "Resumen de pagos". */
@@ -87,20 +70,6 @@
 
 .payments-summary-table th:first-child {
   background: var(--color-primary);
-}
-
-.payments-summary-icon {
-  font-size: 1rem;
-}
-
-.payments-summary-pending {
-  color: var(--color-danger);
-  font-weight: 700;
-}
-
-.payments-summary-won {
-  color: var(--color-success);
-  font-weight: 700;
 }
 
 /* Toggle switch: "Solo hasta hoy" / "Todos los partidos" en Resumen de pagos. */
@@ -139,11 +108,11 @@
   transition: transform var(--transition-fast);
 }
 
-.toggle-switch input:checked + .toggle-switch__track {
+.toggle-switch input:checked+.toggle-switch__track {
   background: var(--color-primary);
 }
 
-.toggle-switch input:checked + .toggle-switch__track .toggle-switch__thumb {
+.toggle-switch input:checked+.toggle-switch__track .toggle-switch__thumb {
   transform: translateX(18px);
 }
 

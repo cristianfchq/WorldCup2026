@@ -15,6 +15,11 @@ export class BetRepository {
     return docs.map((d) => Bet.fromFirestore(d.id, d.data));
   }
 
+  async getByParticipant(participantId) {
+    const docs = await FirebaseService.getWhere(COLLECTION, 'participantId', '==', participantId);
+    return docs.map((d) => Bet.fromFirestore(d.id, d.data));
+  }
+
   /** Marca (o desmarca) el pago de un participante para un partido puntual. */
   async setPaid(matchId, participant, paid) {
     const bet = new Bet({

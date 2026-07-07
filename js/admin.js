@@ -27,7 +27,12 @@ class AdminApp {
     this.matchRepository = new MatchRepository();
     this.predictionRepository = new PredictionRepository();
     this.betRepository = new BetRepository();
-    this.scoringService = new ScoringService(this.matchRepository, this.predictionRepository);
+    this.scoringService = new ScoringService(
+      this.matchRepository,
+      this.predictionRepository,
+      this.participantRepository,
+      this.betRepository
+    );
     this.importService = new ImportService(this.participantRepository, this.matchRepository);
     this.predictionsOverview = null; // se crea en showPanel(), cuando el DOM del panel ya existe
     this.paymentsSummary = null;

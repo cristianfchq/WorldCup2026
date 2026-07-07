@@ -1,6 +1,7 @@
 import { ParticipantRepository } from './services/ParticipantRepository.js';
 import { MatchRepository } from './services/MatchRepository.js';
 import { PredictionRepository } from './services/PredictionRepository.js';
+import { BetRepository } from './services/BetRepository.js';
 import { ScoringService } from './services/ScoringService.js';
 import { Prediction } from './models/Prediction.js';
 import { ThemeToggle } from './ui/ThemeToggle.js';
@@ -9,6 +10,8 @@ import { PhaseTabs } from './ui/PhaseTabs.js';
 import { DateTabs } from './ui/DateTabs.js';
 import { MatchListView } from './ui/MatchListView.js';
 import { Leaderboard } from './ui/Leaderboard.js';
+import { ParticipantHistory } from './ui/ParticipantHistory.js';
+import { ParticipantDebts } from './ui/ParticipantDebts.js';
 import { Toast } from './ui/Toast.js';
 import { WelcomeModal } from './ui/WelcomeModal.js';
 import { findMostRelevantMatch } from './utils/DateUtils.js';
@@ -26,7 +29,13 @@ class PredictionsApp {
     this.participantRepository = new ParticipantRepository();
     this.matchRepository = new MatchRepository();
     this.predictionRepository = new PredictionRepository();
-    this.scoringService = new ScoringService(this.matchRepository, this.predictionRepository);
+    this.betRepository = new BetRepository();
+    this.scoringService = new ScoringService(
+      this.matchRepository,
+      this.predictionRepository,
+      this.participantRepository,
+      this.betRepository
+    );
 
     this.participants = [];
     this.matches = [];
@@ -69,6 +78,8 @@ class PredictionsApp {
     });
 
     this.leaderboard = new Leaderboard(document.getElementById('leaderboard'));
+    this.participantHistory = new ParticipantHistory(document.getElementById('participant-history'));
+    this.participantDebts = new ParticipantDebts(document.getElementById('participant-debts'));
     this.toast = new Toast(document.getElementById('toast-container'));
     this.welcomeModal = new WelcomeModal();
 
@@ -105,6 +116,8 @@ class PredictionsApp {
     await this.loadPredictionsForSelectedParticipant();
     this.renderMatchesForActiveDate();
     await this.refreshLeaderboard();
+    await this.refreshParticipantHistory();
+    await this.refreshParticipantDebts();
 
     this.showMainContent(participant.name);
     this.welcomeModal.show(participant.name);
@@ -147,6 +160,8 @@ class PredictionsApp {
     const datesOfPhase = [...new Set(this.matches.filter((m) => m.phase === phase).map((m) => m.date))].sort();
     this.dateTabs.setDates(datesOfPhase);
     this.refreshLeaderboard();
+    this.refreshParticipantHistory();
+    this.refreshParticipantDebts();
   }
 
   handleDateChange(date) {
@@ -163,6 +178,20 @@ class PredictionsApp {
   async refreshLeaderboard() {
     const leaderboardRows = await this.scoringService.buildLeaderboard();
     this.leaderboard.render(leaderboardRows);
+  }
+
+  /** Igual que refreshLeaderboard(), pero para la tabla personal "Mis apuestas" del participante logueado. */
+  async refreshParticipantHistory() {
+    if (!this.selectedParticipantId) return;
+    const rows = await this.scoringService.buildParticipantHistory(this.selectedParticipantId);
+    this.participantHistory.render(rows);
+  }
+
+  /** Igual que refreshParticipantHistory(), pero para "Mis deudas" (qué debería pagar / ya pagó / le falta). */
+  async refreshParticipantDebts() {
+    if (!this.selectedParticipantId) return;
+    const summary = await this.scoringService.buildDebtsSummary(this.selectedParticipantId);
+    this.participantDebts.render(summary);
   }
 
   async handleSavePrediction(matchId, scoreA, scoreB, penaltyInfo = { wentToPenalties: false, penaltyWinner: null }) {
